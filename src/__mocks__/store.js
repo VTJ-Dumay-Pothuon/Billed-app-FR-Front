@@ -84,10 +84,21 @@ const mockedBills = {
   },
 }
 
+const mockedUser = {
+  type: 'Employee',
+  email: 'a@a',
+  password: 'a',
+  status: 'pending'
+}
+ 
+
 export default {
   bills() {
     return mockedBills
     //return {}
   },
+  user() {
+    return mockedUser
+  }
 }
 
