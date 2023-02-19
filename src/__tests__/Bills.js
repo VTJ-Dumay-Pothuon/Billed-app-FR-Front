@@ -2,14 +2,16 @@
  * @jest-environment jsdom
  */
 
-import {fireEvent, screen, waitFor} from "@testing-library/dom"
+import {screen, waitFor} from "@testing-library/dom"
+import userEvent from "@testing-library/user-event";
 import '@testing-library/jest-dom/extend-expect'
 import BillsUI from "../views/BillsUI.js"
 import { bills } from "../fixtures/bills.js"
 import { ROUTES_PATH} from "../constants/routes.js";
 import router from "../app/Router.js";
 import {localStorageMock} from "../__mocks__/localStorage.js";
-import { handleClickIconEye } from "../containers/Bills.js";
+import Bills from "../containers/Bills.js";
+import store from "../__mocks__/store.js"
 
 describe("Given I am connected as an employee", () => {
   describe("When I am on Bills Page", () => {
@@ -43,12 +45,19 @@ describe("Given I am connected as an employee", () => {
   describe("When I am on Bills page", () => {
     test("Then clicking on the eye icon should open a modal", () => {
       document.body.innerHTML = BillsUI({ data: bills })
-      const eyeIcon = screen.getAllByTestId('icon-eye')[0];
+      const iconEye = screen.getAllByTestId('icon-eye')[0];
+      const onNavigate = (pathname) => {document.body.innerHTML = ROUTES_PATH({ pathname })}
+      const bill = new Bills({
+          document,
+          onNavigate,
+          store: store,
+          localStorage: localStorageMock
+      })
       // define and trigger the click event
-      const mockClickHandler = jest.fn(handleClickIconEye);
-      eyeIcon.addEventListener('click', mockClickHandler);
-      fireEvent.click(eyeIcon);
-      expect(mockClickHandler).toHaveBeenCalled();
+      $.fn.modal = jest.fn() // TODO: actually mock the modale
+      const spy = jest.spyOn(bill, "handleClickIconEye")
+      userEvent.click(iconEye);
+      expect(spy).toHaveBeenCalled();
       // actually check if the modale is open
       const modale = screen.getByTestId('modaleFile')
       expect(modale).toBeVisible();
