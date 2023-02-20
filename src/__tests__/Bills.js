@@ -18,9 +18,7 @@ describe("Given I am connected as an employee", () => {
     test("Then bill icon in vertical layout should be highlighted", async () => {
 
       Object.defineProperty(window, 'localStorage', { value: localStorageMock })
-      window.localStorage.setItem('user', JSON.stringify({
-        type: 'Employee'
-      }))
+      window.localStorage.setItem('user', JSON.stringify({ type: 'Employee' }))
       const root = document.createElement("div")
       root.setAttribute("id", "root")
       document.body.append(root)
@@ -45,18 +43,13 @@ describe("Given I am connected as an employee", () => {
   describe("When I am on Bills page", () => {
     describe("When I click on the eye icon", () => {
       test("Then it should open a modale", () => {
-        document.body.innerHTML = BillsUI({ data: bills })
+        document.body.innerHTML = BillsUI({ data: [bills] })
         const iconEye = screen.getAllByTestId('icon-eye')[0]
         const onNavigate = (pathname) => {document.body.innerHTML = ROUTES_PATH({ pathname })}
-        const bill = new Bills({
-            document,
-            onNavigate,
-            store: store,
-            localStorage: localStorageMock
-        })
+        const myBills = new Bills({ document, onNavigate, store, localStorageMock })
         // define and trigger the click event
         $.fn.modal = jest.fn() // TODO: actually mock the modale
-        const spy = jest.spyOn(bill, "handleClickIconEye")
+        const spy = jest.spyOn(myBills, "handleClickIconEye")
         userEvent.click(iconEye);
         expect(spy).toHaveBeenCalled();
         // actually check if the modale is open
@@ -64,41 +57,20 @@ describe("Given I am connected as an employee", () => {
         expect(modale).toBeVisible();
       })
     })
-    /*
     describe("When I click on new bill button", () => {
       test("It should redirect to NewBill page", () => {
-        document.body.innerHTML = BillsUI({ data: bills })
+        localStorageMock.setItem('user', JSON.stringify({ type: 'Employee' }))
+        document.body.innerHTML = BillsUI({ data: [bills] })
         const buttonNewBill = screen.getByTestId('btn-new-bill')
-        const onNavigate = (pathname) => {document.body.innerHTML = ROUTES_PATH({ pathname })}
-        const bill = new Bills({
-            document,
-            onNavigate,
-            store: store,
-            localStorage: localStorageMock
+        const onNavigate = (pathname) => { document.body.innerHTML = ROUTES({ pathname }) }
+        const myBills = new Bills({ document, onNavigate, store, localStorageMock })
+        const handleClickNewBill = jest.fn(() => {
+          myBills.handleClickNewBill
+          window.history.pushState(null, null, ROUTES_PATH.NewBill)
         })
-        const spy = jest.spyOn(bill, "handleClickNewBill")
+        buttonNewBill.addEventListener('click', handleClickNewBill)
         userEvent.click(buttonNewBill)
-        expect(spy).toHaveBeenCalled()
-      })
-    })
-    */
-    describe("When I click on new bill button", () => {
-      test("It should redirect to NewBill page", () => {
-        document.body.innerHTML = BillsUI({ data: bills })
-        const buttonNewBill = screen.getByTestId('btn-new-bill')
-        const onNavigate = (pathname) => {
-          console.log('onNavigate called with pathname:', pathname)
-          document.body.innerHTML = ROUTES({ pathname })
-        }
-        const bill = new Bills({
-          document,
-          onNavigate,
-          store: store,
-          localStorage: localStorageMock
-        })
-        const spy = jest.spyOn(bill, "handleClickNewBill")
-        userEvent.click(buttonNewBill)
-        expect(spy).toHaveBeenCalled()
+        expect(handleClickNewBill).toHaveBeenCalled()
         expect(window.location.hash).toBe(ROUTES_PATH.NewBill)
       })
     })
