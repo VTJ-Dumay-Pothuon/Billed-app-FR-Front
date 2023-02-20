@@ -14,6 +14,20 @@ import Bills from "../containers/Bills.js";
 import store from "../__mocks__/store.js"
 
 describe("Given I am connected as an employee", () => {
+  describe("When I navigate to Bills", () => {
+    test("fetches bills from mock API GET", async () => {
+      localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
+      const root = document.createElement("div")
+      root.setAttribute("id", "root")
+      document.body.append(root)
+      router()
+      window.onNavigate(ROUTES_PATH.Bills)
+      await waitFor(() => screen.getByText("Billed"))
+      const contentPending  = await screen.getByText("Loading...")
+      expect(contentPending).toBeTruthy()
+      expect(screen.getByTestId("icon-window")).toBeTruthy()
+    })
+  })
   describe("When I am on Bills Page", () => {
     test("Then bill icon in vertical layout should be highlighted", async () => {
 
