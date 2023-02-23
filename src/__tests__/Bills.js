@@ -12,10 +12,11 @@ import router from "../app/Router.js";
 import { localStorageMock } from "../__mocks__/localStorage.js";
 import Bills from "../containers/Bills.js";
 import store from "../__mocks__/store.js"
+import { formatStatus } from "../app/format.js";
 
 describe("Given I am connected as an employee", () => {
   describe("When I navigate to Bills", () => {
-    test("fetches bills from mock API GET", async () => {
+    test("it should fetch bills from mock API GET", async () => {
       localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
       const root = document.createElement("div")
       root.setAttribute("id", "root")
@@ -27,6 +28,7 @@ describe("Given I am connected as an employee", () => {
       expect(contentPending).toBeTruthy()
       expect(screen.getByTestId("icon-window")).toBeTruthy()
     })
+
   })
   describe("When I am on Bills Page", () => {
     test("Then bill icon in vertical layout should be highlighted", async () => {
@@ -86,6 +88,78 @@ describe("Given I am connected as an employee", () => {
         userEvent.click(buttonNewBill)
         expect(handleClickNewBill).toHaveBeenCalled()
         expect(window.location.hash).toBe(ROUTES_PATH.NewBill)
+      })
+    })
+  })
+})
+
+
+describe('integration tests for "Bills" class', () => {
+  let bills;
+
+  beforeEach(() => {
+    const store = {
+      bills: jest.fn(() => ({
+        list: jest.fn(() => Promise.resolve([
+          {
+            id: 'bill-1',
+            status: 'pending',
+            date: new Date('2022-01-01')
+          },
+          {
+            id: 'bill-2',
+            status: 'accepted',
+            date: new Date('2022-01-02')
+          },
+        ])),
+      })),
+    };
+    document.createElement('div');
+    bills = new Bills({ document, store });
+  });
+
+  describe('When I call "getBills" method', () => {
+    test('it should return an array of bills with formatted date and status', async () => {
+      const formattedBills = await bills.getBills();
+      expect(formattedBills).toEqual([
+        {
+          id: 'bill-1',
+          status: 'En attente',
+          date: '1 Jan. 22',
+        },
+        {
+          id: 'bill-2',
+          status: 'Accepté',
+          date: '2 Jan. 22',
+        }
+      ])
+    })
+    test('it should return an empty array when store contains no bills', async () => {
+      const store = {
+        bills: () => ({
+          list: () => Promise.resolve([])
+        })
+      }
+      const billList = new Bills({ document, store })
+      const bills = await billList.getBills()
+      expect(bills).toEqual([])
+    })
+    test("it should returns unformatted date and formatted status for corrupted data", async () => {
+      const doc = { date: "invalid date", status: "pending" };
+      const store = {
+        bills: jest.fn().mockReturnValue({
+          list: jest.fn().mockResolvedValue([doc]),
+        })
+      };
+      const component = new Bills({ document, store });
+  
+      const result = await component.getBills();
+      
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        ...doc,
+        date: doc.date,
+        status: formatStatus(doc.status)
       })
     })
   })
