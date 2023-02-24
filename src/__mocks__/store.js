@@ -85,10 +85,10 @@ const mockedBills = {
 }
 
 const mockedUser = {
-  type: 'Employee',
-  email: 'a@a',
-  password: 'a',
-  status: 'pending'
+  "type": 'Employee',
+  "email": 'a@a',
+  "password": 'a',
+  "status": 'pending'
 }
  
 
