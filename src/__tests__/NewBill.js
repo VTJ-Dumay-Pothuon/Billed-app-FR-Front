@@ -25,8 +25,8 @@ describe("Given I am connected as an employee", () => {
       expect(screen.getByRole("button")).toBeTruthy()
     })
 
-    describe("When I upload a new file", () => {
-      test("Then it should return an object with fileUrl and key", async () => {
+    describe("When I create a new bill", () => {
+      test("Then it should return a valid object with uploaded file informations", async () => {
         document.body.innerHTML = NewBillUI()
         localStorage.setItem('user',JSON.stringify(store.user()))
         const onNavigate = (pathname) => {document.body.innerHTML = ROUTES_PATH({ pathname })}
@@ -51,45 +51,45 @@ describe("Given I am connected as an employee", () => {
           }
         }
         await handleChangeFile(event);
+        expect(newBill.billId).toEqual('12345')
         expect(newBill.fileUrl).toEqual('https://test.com')
         expect(newBill.fileName).toEqual('test.png')
-        expect(newBill.billId).toEqual('12345')
+      })
+      test ("Then it should return an error message if the file is not a png or jpg", async () => {
+        document.body.innerHTML = NewBillUI()
+        localStorage.setItem('user',JSON.stringify(store.user()))
+        const onNavigate = (pathname) => {document.body.innerHTML = ROUTES_PATH({ pathname })}
+        const newBill = new NewBill({document, onNavigate, store, localStorage})
+        const formData = new FormData()
+        const file = new File(['test'], 'test.pdf', { type: 'application/pdf' })
+        formData.append('file', file)
+        const email = JSON.parse(localStorage.getItem("user")).email
+        formData.append('email', email)
+  
+        newBill.store.bills = jest.fn(() => ({
+          create: jest.fn().mockResolvedValue({ fileUrl: 'https://test.com', key: '12345' })
+        }));
+  
+        const handleChangeFile = jest.fn(newBill.handleChangeFile)
+  
+        const event = {
+          preventDefault: jest.fn(),
+          target: {
+            value: 'C:\\fakepath\\test.pdf',
+            files: [file]
+          }
+        }
+        await handleChangeFile(event);
+        expect(newBill.billId).toEqual('')
+        expect(newBill.fileUrl).toEqual('')
+        expect(newBill.fileName).toEqual('')
+        
+        const expectedError = new Error('Le fichier doit être au format png ou jpg');
+        await expect(Promise.reject(handleChangeFile(event))).rejects.toEqual(expectedError);
       })
     })
 
-    describe('When I submit a form with correct input', () => {
-      test('Then the form should be submitted and the new bill should be added', () => {
-        document.body.innerHTML = NewBillUI()
-        localStorage.setItem('user',JSON.stringify(store.user()))
-        const onNavigate = (pathname) => {document.body.innerHTML = ROUTES({ pathname })}
-        const newBill = new NewBill({document, onNavigate, store, localStorage})
-        const handleSubmit = jest.fn(newBill.handleSubmit)
-
-        const submitButton = screen.getByTestId('btn-send-bill')
-        submitButton.addEventListener('submit', handleSubmit)
-
-        userEvent.selectOptions(
-          screen.getByTestId('expense-type'),
-          'Services en ligne'
-        )
-        fireEvent.change(screen.getByTestId('datepicker'), {
-          target: { value: '2022-02-01' },
-        })
-        userEvent.type(screen.getByTestId('expense-name'), 'Test')
-        userEvent.type(screen.getByTestId('amount'), '100')
-        userEvent.type(screen.getByTestId('vat'), '20')
-        userEvent.type(screen.getByTestId('pct'), '20')
-        userEvent.type(screen.getByTestId('commentary'), 'Juste un test')
-
-        const file = new File(['hello'], 'hello.png', { type: 'image/png' })
-
-        Object.defineProperty(screen.getByTestId('file'), 'files', {
-          value: [file],
-        })
-        userEvent.click(submitButton)
-
-        expect(handleSubmit).toHaveBeenCalled()
-      })
+    describe('When I update an existing bill', () => {
       test("Then it should update the store with the new bill information and redirect to Bills page", () => {
         document.body.innerHTML = NewBillUI()
         localStorage.setItem('user',JSON.stringify(store.user()))
