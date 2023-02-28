@@ -49,10 +49,11 @@ describe("Given I am connected as an employee", () => {
 
     test("Then bills should be ordered from earliest to latest", () => {
       document.body.innerHTML = BillsUI({ data: bills })
-      const dates = screen.getAllByText(/^(19|20)\d\d[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])$/i).map(a => a.innerHTML)
+      const dates = screen.queryAllByTestId('expense-date')
+      const datesText = dates.map(a => a.innerHTML)
       const antiChrono = (a, b) => ((a < b) ? 1 : -1)
-      const datesSorted = [...dates].sort(antiChrono)
-      expect(dates).toEqual(datesSorted)
+      const datesSorted = [...datesText].sort(antiChrono)
+      expect(datesText).toEqual(datesSorted)
     })
   })
 
@@ -123,14 +124,14 @@ describe('integration tests for "Bills" class', () => {
       const formattedBills = await bills.getBills();
       expect(formattedBills).toEqual([
         {
-          id: 'bill-1',
-          status: 'En attente',
-          date: '1 Jan. 22',
-        },
-        {
           id: 'bill-2',
           status: 'Accepté',
           date: '2 Jan. 22',
+        },
+        {
+          id: 'bill-1',
+          status: 'En attente',
+          date: '1 Jan. 22',
         }
       ])
     })
