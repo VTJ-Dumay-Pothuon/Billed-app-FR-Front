@@ -79,13 +79,14 @@ describe("Given I am connected as an employee", () => {
             files: [file]
           }
         }
-        await handleChangeFile(event);
+        try {
+          await handleChangeFile(event);
+        } catch (error) {
+          expect(error.message).toEqual("Le fichier doit être au format png ou jpeg");
+        }
         expect(newBill.billId).toEqual('')
         expect(newBill.fileUrl).toEqual('')
         expect(newBill.fileName).toEqual('')
-        
-        const expectedError = new Error('Le fichier doit être au format png ou jpg');
-        await expect(Promise.reject(handleChangeFile(event))).rejects.toEqual(expectedError);
       })
     })
 
