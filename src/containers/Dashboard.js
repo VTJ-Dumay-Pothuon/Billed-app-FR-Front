@@ -146,6 +146,8 @@ export default class {
     }
 
     bills.forEach(bill => {
+      // first we remove all click event so that it's not duplicated
+      $(`#open-bill${bill.id}`).off('click')
       $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
     })
 
