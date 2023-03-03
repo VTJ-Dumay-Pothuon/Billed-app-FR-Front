@@ -119,6 +119,7 @@ describe('integration tests for "Bills" class', () => {
     bills = new Bills({ document, store });
   });
 
+  // Integration tests
   describe('When I call "getBills" method', () => {
     test('it should return an array of bills with formatted date and status', async () => {
       const formattedBills = await bills.getBills();

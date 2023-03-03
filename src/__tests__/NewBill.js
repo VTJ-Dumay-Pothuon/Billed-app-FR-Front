@@ -90,7 +90,8 @@ describe("Given I am connected as an employee", () => {
       })
     })
 
-    describe('When I update an existing bill', () => {
+    // Integration test
+    describe('When I send a POST request that contains a new bill to the API', () => {
       test("Then it should update the store with the new bill information and redirect to Bills page", () => {
         document.body.innerHTML = NewBillUI()
         localStorage.setItem('user',JSON.stringify(store.user()))
