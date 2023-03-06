@@ -4,8 +4,7 @@
 
 import NewBillUI from '../views/NewBillUI.js'
 import NewBill from '../containers/NewBill.js'
-import { fireEvent, screen } from '@testing-library/dom'
-import userEvent from '@testing-library/user-event'
+import { screen } from '@testing-library/dom'
 import store from '../__mocks__/store.js'
 import { ROUTES, ROUTES_PATH } from '../constants/routes'
 
