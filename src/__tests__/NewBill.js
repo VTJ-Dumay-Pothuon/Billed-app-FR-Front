@@ -9,9 +9,12 @@ import store from '../__mocks__/store.js'
 import { ROUTES, ROUTES_PATH } from '../constants/routes'
 
 describe("Given I am connected as an employee", () => {
+  beforeEach(() => {
+    document.body.innerHTML = NewBillUI()
+    localStorage.setItem('user',JSON.stringify(store.user()))
+  })
   describe("When I am on NewBill Page", () => {
     test("Then the new bill form should be fully displayed", () => {
-      document.body.innerHTML = NewBillUI()
       expect(screen.getByTestId("form-new-bill")).toBeTruthy()
       expect(screen.getByTestId("expense-type")).toBeTruthy()
       expect(screen.getByTestId("expense-name")).toBeTruthy()
@@ -26,8 +29,6 @@ describe("Given I am connected as an employee", () => {
 
     describe("When I create a new bill", () => {
       test("Then it should return a valid object with uploaded file informations", async () => {
-        document.body.innerHTML = NewBillUI()
-        localStorage.setItem('user',JSON.stringify(store.user()))
         const onNavigate = (pathname) => {document.body.innerHTML = ROUTES_PATH({ pathname })}
         const newBill = new NewBill({document, onNavigate, store, localStorage})
         const formData = new FormData()
@@ -38,7 +39,7 @@ describe("Given I am connected as an employee", () => {
   
         newBill.store.bills = jest.fn(() => ({
           create: jest.fn().mockResolvedValue({ fileUrl: 'https://test.com', key: '12345' })
-        }));
+        }))
   
         const handleChangeFile = jest.fn(newBill.handleChangeFile)
   
@@ -49,14 +50,12 @@ describe("Given I am connected as an employee", () => {
             files: [file]
           }
         }
-        await handleChangeFile(event);
+        await handleChangeFile(event)
         expect(newBill.billId).toEqual('12345')
         expect(newBill.fileUrl).toEqual('https://test.com')
         expect(newBill.fileName).toEqual('test.png')
       })
       test ("Then it should return an error message if the file is not a png or jpg", async () => {
-        document.body.innerHTML = NewBillUI()
-        localStorage.setItem('user',JSON.stringify(store.user()))
         const onNavigate = (pathname) => {document.body.innerHTML = ROUTES_PATH({ pathname })}
         const newBill = new NewBill({document, onNavigate, store, localStorage})
         const formData = new FormData()
@@ -67,7 +66,7 @@ describe("Given I am connected as an employee", () => {
   
         newBill.store.bills = jest.fn(() => ({
           create: jest.fn().mockResolvedValue({ fileUrl: 'https://test.com', key: '12345' })
-        }));
+        }))
   
         const handleChangeFile = jest.fn(newBill.handleChangeFile)
   
@@ -79,9 +78,9 @@ describe("Given I am connected as an employee", () => {
           }
         }
         try {
-          await handleChangeFile(event);
+          await handleChangeFile(event)
         } catch (error) {
-          expect(error.message).toEqual("Le fichier doit être au format png ou jpeg");
+          expect(error.message).toEqual("Le fichier doit être au format png ou jpeg")
         }
         expect(newBill.billId).toEqual('')
         expect(newBill.fileUrl).toEqual('')
@@ -92,8 +91,6 @@ describe("Given I am connected as an employee", () => {
     // Integration test
     describe('When I send a POST request that contains a new bill to the API', () => {
       test("Then it should update the store with the new bill information and redirect to Bills page", () => {
-        document.body.innerHTML = NewBillUI()
-        localStorage.setItem('user',JSON.stringify(store.user()))
         const onNavigate = (pathname) => { document.body.innerHTML = ROUTES({ pathname }) }
         const newBill = new NewBill({document, onNavigate, store, localStorage})
         newBill.store.bills = jest.fn(() => ({
@@ -119,12 +116,78 @@ describe("Given I am connected as an employee", () => {
         newBill.fileUrl = "https://test.com"
         newBill.fileName = "test.png"
         newBill.billId = "12345"
-        const updateBillSpy = jest.spyOn(newBill, 'updateBill');
-        const updateOnNavigateSpy = jest.spyOn(newBill, 'onNavigate');
+        const updateBillSpy = jest.spyOn(newBill, 'updateBill')
+        const updateOnNavigateSpy = jest.spyOn(newBill, 'onNavigate')
         handleSubmit(event)
         
         expect(updateBillSpy).toHaveBeenCalled()
         expect(updateOnNavigateSpy).toHaveBeenCalledWith('#employee/bills')
+      })
+      describe('When I send a POST request to the API and the router redirects to a wrong page', () => {
+        test("Then it should display an Error 404 message", async () => {
+          expect.assertions(2)
+          const onNavigate = () => { 
+            const error = new Error("Erreur 404")
+            error.status = 404
+            throw error 
+          }
+          const newBill = new NewBill({document, onNavigate, store, localStorage})
+    
+          const handleSubmit = jest.fn(newBill.handleSubmit)
+    
+          const event = {
+            preventDefault: jest.fn(),
+            target: {
+              querySelector: jest.fn().mockReturnValueOnce({ value: null }) // target[0] is user email, not a form input
+                                      .mockReturnValueOnce({ value: "Transports" })
+                                      .mockReturnValueOnce({ value: "Test" })
+                                      .mockReturnValueOnce({ value: "20" })
+                                      .mockReturnValueOnce({ value: "2022-02-10" })
+                                      .mockReturnValueOnce({ value: "2" })
+                                      .mockReturnValueOnce({ value: "20" })
+                                      .mockReturnValueOnce({ value: "Test" }),
+            }
+          }
+          
+          try {
+            await handleSubmit(event)
+          } catch (error) {
+            expect(error.status).toBe(404)
+            expect(error.message).toBe("Erreur 404")
+          }
+        })
+      })
+      describe ('When I send a POST request to the API and the router rejects the request', () => {
+        test("Then it should display an Error 500 message", async () => {
+          store.bills = jest.fn(() => ({
+            update: jest.fn().mockRejectedValue(new Error("Erreur 500"))
+          }))
+          const onNavigate = jest.fn()
+          const newBill = new NewBill({document, onNavigate, store, localStorage})
+    
+          const handleSubmit = jest.fn(newBill.handleSubmit)
+    
+          const event = {
+            preventDefault: jest.fn(),
+            target: {
+              querySelector: jest.fn().mockReturnValueOnce({ value: null }) // target[0] is user email, not a form input
+                                      .mockReturnValueOnce({ value: "Transports" })
+                                      .mockReturnValueOnce({ value: "Test" })
+                                      .mockReturnValueOnce({ value: "20" })
+                                      .mockReturnValueOnce({ value: "2022-02-10" })
+                                      .mockReturnValueOnce({ value: "2" })
+                                      .mockReturnValueOnce({ value: "20" })
+                                      .mockReturnValueOnce({ value: "Test" }),
+            }
+          }
+          
+          try {
+            await handleSubmit(event)
+          } catch (error) {
+            expect(error.status).toBe(500)
+            expect(error.message).toBe("Erreur 500")
+          }
+        })
       })
     })
   })
