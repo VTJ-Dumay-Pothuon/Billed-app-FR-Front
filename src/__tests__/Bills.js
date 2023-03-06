@@ -64,13 +64,15 @@ describe("Given I am connected as an employee", () => {
         const iconEye = screen.getAllByTestId('icon-eye')[0]
         const onNavigate = (pathname) => {document.body.innerHTML = ROUTES_PATH({ pathname })}
         const myBills = new Bills({ document, onNavigate, store, localStorageMock })
+        // define the modale
+        const modale = screen.getByTestId('modaleFile')
+        $.fn.modal = jest.fn(() => modale.classList.add("show"));
         // define and trigger the click event
-        $.fn.modal = jest.fn() // TODO: actually mock the modale
         const spy = jest.spyOn(myBills, "handleClickIconEye")
         userEvent.click(iconEye);
         expect(spy).toHaveBeenCalled();
         // actually check if the modale is open
-        const modale = screen.getByTestId('modaleFile')
+        expect(modale.classList).toContain("show");
         expect(modale).toBeVisible();
       })
     })
