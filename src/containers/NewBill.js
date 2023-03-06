@@ -22,9 +22,10 @@ export default class NewBill {
       this.fileName = ''
       this.fileUrl = ''
       this.billId = ''
-      alert ('Le fichier doit être au format png ou jpeg')
+      const error = new Error('Le fichier doit être au format png ou jpeg')
+      alert(error.message)
       e.target.value = ''
-      throw new Error('Le fichier doit être au format png ou jpeg')
+      throw error
     }
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length-1]
