@@ -147,7 +147,7 @@ describe("Given I am connected as an employee", () => {
           }
         })
       })
-      describe ('When I send a POST request to the API and the router rejects the request', () => {
+      describe ('When I send a POST request to the API and the server rejects the request', () => {
         test("Then it should display an Error 500 message", async () => {
           store.bills = jest.fn(() => ({
             update: jest.fn().mockRejectedValue(new Error("Erreur 500"))
