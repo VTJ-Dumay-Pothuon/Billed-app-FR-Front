@@ -8,11 +8,29 @@ import { screen } from '@testing-library/dom'
 import store from '../__mocks__/store.js'
 import { ROUTES, ROUTES_PATH } from '../constants/routes'
 
+let mockEvent // set in beforeEach as a valid POST event
+
 describe("Given I am connected as an employee", () => {
+
   beforeEach(() => {
     document.body.innerHTML = NewBillUI()
     localStorage.setItem('user',JSON.stringify(store.user()))
+
+    mockEvent = {
+      preventDefault: jest.fn(),
+      target: {
+        querySelector: jest.fn().mockReturnValueOnce({ value: null }) // target[0] is user email, not a form input
+                                .mockReturnValueOnce({ value: "Transports" })
+                                .mockReturnValueOnce({ value: "Test" })
+                                .mockReturnValueOnce({ value: "20" })
+                                .mockReturnValueOnce({ value: "2022-02-10" })
+                                .mockReturnValueOnce({ value: "2" })
+                                .mockReturnValueOnce({ value: "20" })
+                                .mockReturnValueOnce({ value: "Test" }),
+      }
+    }
   })
+
   describe("When I am on NewBill Page", () => {
     test("Then the new bill form should be fully displayed", () => {
       expect(screen.getByTestId("form-new-bill")).toBeTruthy()
@@ -99,26 +117,12 @@ describe("Given I am connected as an employee", () => {
   
         const handleSubmit = jest.fn(newBill.handleSubmit)
   
-        const event = {
-          preventDefault: jest.fn(),
-          target: {
-            querySelector: jest.fn().mockReturnValueOnce({ value: null }) // target[0] is user email, not a form input
-                                    .mockReturnValueOnce({ value: "Transports" })
-                                    .mockReturnValueOnce({ value: "Test" })
-                                    .mockReturnValueOnce({ value: "20" })
-                                    .mockReturnValueOnce({ value: "2022-02-10" })
-                                    .mockReturnValueOnce({ value: "2" })
-                                    .mockReturnValueOnce({ value: "20" })
-                                    .mockReturnValueOnce({ value: "Test" }),
-          }
-        }
-  
         newBill.fileUrl = "https://test.com"
         newBill.fileName = "test.png"
         newBill.billId = "12345"
         const updateBillSpy = jest.spyOn(newBill, 'updateBill')
         const updateOnNavigateSpy = jest.spyOn(newBill, 'onNavigate')
-        handleSubmit(event)
+        handleSubmit(mockEvent)
         
         expect(updateBillSpy).toHaveBeenCalled()
         expect(updateOnNavigateSpy).toHaveBeenCalledWith('#employee/bills')
@@ -134,23 +138,9 @@ describe("Given I am connected as an employee", () => {
           const newBill = new NewBill({document, onNavigate, store, localStorage})
     
           const handleSubmit = jest.fn(newBill.handleSubmit)
-    
-          const event = {
-            preventDefault: jest.fn(),
-            target: {
-              querySelector: jest.fn().mockReturnValueOnce({ value: null }) // target[0] is user email, not a form input
-                                      .mockReturnValueOnce({ value: "Transports" })
-                                      .mockReturnValueOnce({ value: "Test" })
-                                      .mockReturnValueOnce({ value: "20" })
-                                      .mockReturnValueOnce({ value: "2022-02-10" })
-                                      .mockReturnValueOnce({ value: "2" })
-                                      .mockReturnValueOnce({ value: "20" })
-                                      .mockReturnValueOnce({ value: "Test" }),
-            }
-          }
           
           try {
-            await handleSubmit(event)
+            await handleSubmit(mockEvent)
           } catch (error) {
             expect(error.status).toBe(404)
             expect(error.message).toBe("Erreur 404")
@@ -166,23 +156,9 @@ describe("Given I am connected as an employee", () => {
           const newBill = new NewBill({document, onNavigate, store, localStorage})
     
           const handleSubmit = jest.fn(newBill.handleSubmit)
-    
-          const event = {
-            preventDefault: jest.fn(),
-            target: {
-              querySelector: jest.fn().mockReturnValueOnce({ value: null }) // target[0] is user email, not a form input
-                                      .mockReturnValueOnce({ value: "Transports" })
-                                      .mockReturnValueOnce({ value: "Test" })
-                                      .mockReturnValueOnce({ value: "20" })
-                                      .mockReturnValueOnce({ value: "2022-02-10" })
-                                      .mockReturnValueOnce({ value: "2" })
-                                      .mockReturnValueOnce({ value: "20" })
-                                      .mockReturnValueOnce({ value: "Test" }),
-            }
-          }
           
           try {
-            await handleSubmit(event)
+            await handleSubmit(mockEvent)
           } catch (error) {
             expect(error.status).toBe(500)
             expect(error.message).toBe("Erreur 500")
