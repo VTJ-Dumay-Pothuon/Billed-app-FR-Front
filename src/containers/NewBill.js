@@ -18,15 +18,6 @@ export default class NewBill {
   handleChangeFile = e => {
     e.preventDefault()
     const file = this.document.querySelector(`input[data-testid="file"]`).files[0]
-    if (!e.target.value.match(/.png|.jpeg|.jpg/)) {
-      this.fileName = ''
-      this.fileUrl = ''
-      this.billId = ''
-      const error = new Error('Le fichier doit être au format png ou jpeg')
-      alert(error.message)
-      e.target.value = ''
-      throw error
-    }
     const filePath = e.target.value.split(/\\/g)
     const fileName = filePath[filePath.length-1]
     const formData = new FormData()
@@ -43,6 +34,15 @@ export default class NewBill {
         }
       })
       .then(({fileUrl, key}) => {
+        if (!e.target.value.match(/.png|.jpeg|.jpg/)) {
+          this.billId = ''
+          this.fileUrl = ''
+          this.fileName = ''
+          const error = new Error('Le fichier doit être au format png ou jpeg')
+          alert(error.message)
+          e.target.value = ''
+          throw error
+        }
         console.log(fileUrl)
         this.billId = key
         this.fileUrl = fileUrl

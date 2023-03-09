@@ -7,6 +7,7 @@ import NewBill from '../containers/NewBill.js'
 import { screen } from '@testing-library/dom'
 import store from '../__mocks__/store.js'
 import { ROUTES, ROUTES_PATH } from '../constants/routes'
+import sinon from 'sinon'
 
 let mockEvent // set in beforeEach as a valid POST event
 
@@ -87,6 +88,7 @@ describe("Given I am connected as an employee", () => {
         }))
   
         const handleChangeFile = jest.fn(newBill.handleChangeFile)
+        window.alert = jest.fn()
   
         const event = {
           preventDefault: jest.fn(),
@@ -95,14 +97,19 @@ describe("Given I am connected as an employee", () => {
             files: [file]
           }
         }
+        const consoleSpy = sinon.spy(console, 'error')
         try {
           await handleChangeFile(event)
         } catch (error) {
           expect(error.message).toEqual("Le fichier doit être au format png ou jpeg")
+          console.log(error.message)
+          console.log(consoleSpy.args)
+          expect(consoleSpy.calledWithMatch("Le fichier doit être au format png ou jpeg")).toBe(true)
         }
         expect(newBill.billId).toEqual('')
         expect(newBill.fileUrl).toEqual('')
         expect(newBill.fileName).toEqual('')
+        consoleSpy.restore()
       })
     })
 
