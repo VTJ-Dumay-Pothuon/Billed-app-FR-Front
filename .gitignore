@@ -2,3 +2,4 @@ node_modules
 coverage
 .idea
 src/__tests__/__snapshots__
+test-report.json

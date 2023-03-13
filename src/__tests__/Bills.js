@@ -3,21 +3,21 @@
  */
 
 import { screen, waitFor } from "@testing-library/dom"
-import userEvent from "@testing-library/user-event";
+import userEvent from "@testing-library/user-event"
 import '@testing-library/jest-dom/extend-expect'
 import BillsUI from "../views/BillsUI.js"
 import { bills } from "../fixtures/bills.js"
-import { ROUTES, ROUTES_PATH } from "../constants/routes.js";
-import router from "../app/Router.js";
-import { localStorageMock } from "../__mocks__/localStorage.js";
-import Bills from "../containers/Bills.js";
+import { ROUTES, ROUTES_PATH } from "../constants/routes.js"
+import router from "../app/Router.js"
+import { localStorageMock } from "../__mocks__/localStorage.js"
+import Bills from "../containers/Bills.js"
 import store from "../__mocks__/store.js"
-import { formatStatus } from "../app/format.js";
+import { formatStatus } from "../app/format.js"
 
 describe("Given I am connected as an employee", () => {
   describe("When I navigate to Bills", () => {
-    test("it should fetch bills from mock API GET", async () => {
-      localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }));
+    test("it should render the core UI with a loading message", async () => {
+      localStorage.setItem("user", JSON.stringify({ type: "Employee", email: "a@a" }))
       const root = document.createElement("div")
       root.setAttribute("id", "root")
       document.body.append(root)
@@ -66,14 +66,14 @@ describe("Given I am connected as an employee", () => {
         const myBills = new Bills({ document, onNavigate, store, localStorageMock })
         // define the modale
         const modale = screen.getByTestId('modaleFile')
-        $.fn.modal = jest.fn(() => modale.classList.add("show"));
+        $.fn.modal = jest.fn(() => modale.classList.add("show"))
         // define and trigger the click event
         const spy = jest.spyOn(myBills, "handleClickIconEye")
-        userEvent.click(iconEye);
-        expect(spy).toHaveBeenCalled();
+        userEvent.click(iconEye)
+        expect(spy).toHaveBeenCalled()
         // actually check if the modale is open
-        expect(modale.classList).toContain("show");
-        expect(modale).toBeVisible();
+        expect(modale.classList).toContain("show")
+        expect(modale).toBeVisible()
       })
     })
     describe("When I click on new bill button", () => {
@@ -98,7 +98,7 @@ describe("Given I am connected as an employee", () => {
 
 
 describe('integration tests for "Bills" class', () => {
-  let bills;
+  let bills
 
   beforeEach(() => {
     const store = {
@@ -116,15 +116,15 @@ describe('integration tests for "Bills" class', () => {
           },
         ])),
       })),
-    };
-    document.createElement('div');
-    bills = new Bills({ document, store });
-  });
+    }
+    document.createElement('div')
+    bills = new Bills({ document, store })
+  })
 
   // Integration tests
   describe('When I call "getBills" method', () => {
     test('it should return an array of bills with formatted date and status', async () => {
-      const formattedBills = await bills.getBills();
+      const formattedBills = await bills.getBills()
       expect(formattedBills).toEqual([
         {
           id: 'bill-2',
@@ -149,17 +149,17 @@ describe('integration tests for "Bills" class', () => {
       expect(bills).toEqual([])
     })
     test("it should returns unformatted date and formatted status for corrupted data", async () => {
-      const doc = { date: "invalid date", status: "pending" };
+      const doc = { date: "invalid date", status: "pending" }
       const store = {
         bills: jest.fn().mockReturnValue({
           list: jest.fn().mockResolvedValue([doc]),
         })
-      };
-      const component = new Bills({ document, store });
+      }
+      const component = new Bills({ document, store })
   
-      const result = await component.getBills();
+      const result = await component.getBills()
       
-      expect(result).toHaveLength(1);
+      expect(result).toHaveLength(1)
       expect(result[0]).toEqual({
         ...doc,
         date: doc.date,
