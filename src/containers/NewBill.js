@@ -30,6 +30,7 @@ export default class NewBill {
         const error = new Error('Le fichier doit être au format png ou jpeg')
         alert(error.message)
         e.target.value = ''
+        formData.delete
         throw error
       }
       formData.append('file', file)
