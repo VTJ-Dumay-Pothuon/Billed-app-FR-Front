@@ -84,11 +84,11 @@ Vous pouvez vous connecter en utilisant les comptes:
 
 ### administrateur : 
 ```
-utilisateur : admin@test.tld 
+utilisateur : admin@company.tld 
 mot de passe : admin
 ```
 ### employé :
 ```
-utilisateur : employee@test.tld
+utilisateur : employee@company.tld
 mot de passe : employee
 ```
