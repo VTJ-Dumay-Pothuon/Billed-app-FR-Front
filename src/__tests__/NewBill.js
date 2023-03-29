@@ -102,8 +102,6 @@ describe("Given I am connected as an employee", () => {
           await handleChangeFile(event)
         } catch (error) {
           expect(error.message).toEqual("Le fichier doit être au format png ou jpeg")
-          console.log(error.message)
-          console.log(consoleSpy.args)
           expect(consoleSpy.calledWithMatch("Le fichier doit être au format png ou jpeg")).toBe(true)
         }
         expect(newBill.billId).toEqual('')

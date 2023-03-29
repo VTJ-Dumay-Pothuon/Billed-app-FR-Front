@@ -37,6 +37,7 @@ export default class NewBill {
       formData.append('email', email)
     } catch (error) {
       console.error(error)
+      return
     }
     this.store
       .bills()
